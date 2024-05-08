@@ -78,6 +78,8 @@ def get_char_array(file_path: str):
     with open(file_path, "r") as f:
         str = f.read()
         str = str.strip().replace(" ", "")
+        # remove duplicate characters
+        str = "".join(dict.fromkeys(str))
         return list(str)
     
 def gen_char_name(char: str):
