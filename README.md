@@ -12,7 +12,7 @@ Install pip denpendcies
 pip install -r requirements.txt
 ```
 
-Note: If you use python virtual environments, do not forget to create and activate it before installing dependcies.
+Note: If you use python virtual environments, do not forget to create and activate it before installing dependencies.
 
 ### Usage
 
