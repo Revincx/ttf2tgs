@@ -149,7 +149,7 @@ if __name__ == "__main__":
     for char in chars:
         export_glyph(font, char)
         svg = import_svg(f"{output_path}/{gen_char_name(char)}.svg")
-        tgs = export_tgs(svg, f"{output_path}/{gen_char_name(char)}.tgs")
+        tgs = export_tgs(svg, f"{output_path}/{gen_char_name(char)}.tgs", True, True)
 
         if args.svg is False:
             os.remove(f"{output_path}/{gen_char_name(char)}.svg")

@@ -5,4 +5,8 @@ tgs
 chars.txt
 
 *.ttf
+*.TTF
 *.otf
+
+*.tgs
+*.svg
