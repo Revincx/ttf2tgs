@@ -15,43 +15,48 @@ scale = 1.0
 
 def export_glyph(font: TTFont, character: str):
     glyph_set = font.getGlyphSet()
-
-    unicode_value = ord(character)  # 获取字符的 Unicode 码点
-    glyph_name = font.getBestCmap().get(unicode_value)  # 从字符映射表中获取 glyph 名称
+    
+    # 获取字体的em方格大小（设计单位）
+    units_per_em = font['head'].unitsPerEm
+    
+    unicode_value = ord(character)
+    glyph_name = font.getBestCmap().get(unicode_value)
 
     if glyph_name:
         glyph = glyph_set[glyph_name]
 
-        bpen = BoundsPen(glyph)
+        # 检查字形是否有轮廓
+        bpen = BoundsPen(glyph_set)
         glyph.draw(bpen)
-
-        bounds = bpen.bounds
-
-        xMin, yMin, xMax, yMax = bounds
-        width = xMax - xMin
-        height = yMax - yMin
-
-        max_length = max(width, height)
-
-        # Center the glyph in the output image
-        dxOffset = 0
-        dyOffset = 0
-
-        if width > height:
-            dyOffset = (max_length - height) / 2
+        
+        if bpen.bounds is None:
+            print(f"Character '{character}' has no outline, skipping.")
+            return
+            
+        # 使用em方格作为SVG大小
+        svg_size = units_per_em
+        
+        # 获取字形的边界
+        xMin, yMin, xMax, yMax = bpen.bounds
+        
+        # 计算边界中心
+        center_x = (xMin + xMax) / 2
+        center_y = (yMin + yMax) / 2
+        
+        # 根据翻转与缩放修正变换矩阵
+        if scale == 1.0:
+            transform = Transform(
+                1, 0,
+                0, -1,
+                (svg_size / 2) - center_x,
+                (svg_size / 2) + center_y
+            )
         else:
-            dxOffset = (max_length - width) / 2
-
-        transform = Transform(1, 0, 0, -1, -xMin + dxOffset, height + yMin + dyOffset)
-
-        if scale != 1.0:
-            transform = Transform(  # Affine Transform Matrix
-                scale,  # xx
-                0,  # xy
-                0,  # yx
-                -scale,  # yy
-                -xMin * scale + (1 - scale) * 0.5 * width + dxOffset,  # dx
-                (height + yMin) * scale + (1 - scale) * 0.5 * height + dyOffset,  # dy
+            transform = Transform(
+                scale, 0,
+                0, -scale,
+                (svg_size / 2) - scale * center_x,
+                (svg_size / 2) + scale * center_y
             )
 
         spen = SVGPathPen(glyph)
@@ -60,8 +65,8 @@ def export_glyph(font: TTFont, character: str):
 
         svg_root = Element(
             "svg",
-            width=str(max_length),
-            height=str(max_length),
+            width=str(svg_size),
+            height=str(svg_size),
             xmlns="http://www.w3.org/2000/svg",
         )
         svg_root.append(
@@ -72,12 +77,13 @@ def export_glyph(font: TTFont, character: str):
             f.write(tostring(svg_root))
     else:
         print(f"No glyph found for the character {character}")
+        
 
 
 def get_char_array(file_path: str):
     with open(file_path, "r") as f:
         str = f.read()
-        str = str.strip().replace(" ", "")
+        str = str.strip().replace(" ", "").replace("\n", "").replace("\r", "")
         # remove duplicate characters
         str = "".join(dict.fromkeys(str))
         return list(str)

@@ -2,7 +2,9 @@
 
 tgs
 
-chars.txt
+!requirements.txt
+
+*.txt
 
 *.ttf
 *.TTF
