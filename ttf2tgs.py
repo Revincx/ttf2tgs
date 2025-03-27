@@ -13,7 +13,7 @@ from argparse import ArgumentParser
 output_path = "./tgs"
 scale = 1.0
 
-def export_glyph(font: TTFont, character: str):
+def export_glyph(font: TTFont, character: str) -> bool:
     glyph_set = font.getGlyphSet()
     
     # 获取字体的em方格大小（设计单位）
@@ -75,12 +75,15 @@ def export_glyph(font: TTFont, character: str):
 
         with open(f"{output_path}/{gen_char_name(character)}.svg", "wb") as f:
             f.write(tostring(svg_root))
+
+        return True
     else:
-        print(f"No glyph found for the character {character}")
+        print(f"No glyph found for the character '{character}', skipped")
+        return False
         
 
 
-def get_char_array(file_path: str):
+def get_char_array(file_path: str) -> list:
     with open(file_path, "r") as f:
         str = f.read()
         str = str.strip().replace(" ", "").replace("\n", "").replace("\r", "")
@@ -88,7 +91,7 @@ def get_char_array(file_path: str):
         str = "".join(dict.fromkeys(str))
         return list(str)
     
-def gen_char_name(char: str):
+def gen_char_name(char: str) -> str:
     # escape special characters
     charname = char
     if char == "\\":
@@ -130,7 +133,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--scale",
         type=float,
-        help="Output image scale factor, less than 1.0",
+        help="Output image scale factor, between 0 and 1.0",
         default=1.0,
     )
     parser.add_argument("--svg", action="store_true", help="Save SVG files")
@@ -153,7 +156,11 @@ if __name__ == "__main__":
         os.makedirs(output_path)
 
     for char in chars:
-        export_glyph(font, char)
+        exported = export_glyph(font, char)
+
+        if not exported:
+            continue
+
         svg = import_svg(f"{output_path}/{gen_char_name(char)}.svg")
         tgs = export_tgs(svg, f"{output_path}/{gen_char_name(char)}.tgs", True, True)
 
