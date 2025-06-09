@@ -33,6 +33,12 @@ options:
   --output OUTPUT  target directory to the output TGS files, default ./tgs
   --scale SCALE    output image scale factor, between 0 and 1.0
   --svg            save glyph SVG files
+  --color COLOR    fill color for SVG glyphs (default black, or white with outline enabled)
+  --outline        enable outline stroke for SVG glyphs
+  --outline-color OUTLINE_COLOR
+                   color of outline stroke, default #000000
+  --outline-thickness OUTLINE_THICKNESS
+                   stroke width for outline in font units, default 5, between 1 and 9
 ```
 
 ### Thanks

@@ -12,6 +12,10 @@ from argparse import ArgumentParser
 
 output_path = "./tgs"
 scale = 1.0
+fill_color = "#000000"
+outline = False
+outline_color = "#000000"
+outline_thickness = 4
 
 def export_glyph(font: TTFont, character: str, index: int) -> bool:
     glyph_set = font.getGlyphSet()
@@ -69,9 +73,15 @@ def export_glyph(font: TTFont, character: str, index: int) -> bool:
             height=str(svg_size),
             xmlns="http://www.w3.org/2000/svg",
         )
-        svg_root.append(
-            Element("path", d=spen.getCommands(), fill="black", stroke="none")
-        )
+        stroke_val = outline_color if outline else "none"
+        path_args = {
+            "d": spen.getCommands(),
+            "fill": fill_color,
+            "stroke": stroke_val,
+        }
+        if outline:
+            path_args["stroke-width"] = str(outline_thickness)
+        svg_root.append(Element("path", **path_args))
 
         with open(f"{output_path}/{index}_{gen_char_name(character)}.svg", "wb") as f:
             f.write(tostring(svg_root))
@@ -137,11 +147,42 @@ if __name__ == "__main__":
         default=1.0,
     )
     parser.add_argument("--svg", action="store_true", help="Save SVG files")
+    parser.add_argument(
+        "--color",
+        type=str,
+        default=None,
+        help="Fill color for SVG glyphs (default black, or white with outline enabled)",
+    )
+    parser.add_argument(
+        "--outline",
+        action="store_true",
+        help="Enable outline stroke for SVG glyphs",
+    )
+    parser.add_argument(
+        "--outline-color",
+        type=str,
+        default=outline_color,
+        help="Color of outline stroke, default #000000",
+    )
+    parser.add_argument(
+        "--outline-thickness",
+        type=float,
+        default=outline_thickness,
+        help="stroke width for outline in font units, default 5, between 1 and 9",
+    )
 
     args = parser.parse_args()
 
     output_path = args.output if args.output else output_path
-    scale = args.scale if args.scale < 1 and args.scale > 0 else scale
+    scale = min(max(args.scale, 0.1), 1.0)  
+    outline = args.outline
+    outline_color = args.outline_color
+    outline_thickness = min(max(args.outline_thickness, 1), 9) * scale
+    if args.color:
+        fill_color = args.color
+    else:
+        fill_color = "#ffffff" if outline else "#000000"
+
 
     if not os.path.exists(args.font):
         print(f"Font file not found: {args.font}")
