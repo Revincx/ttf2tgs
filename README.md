@@ -6,7 +6,7 @@ Export Font Glyphs to Telegram Animated Sticker Format
 
 - Python 3.x
 
-Install pip denpendcies
+Install pip dependencies
 
 ```sh
 pip install -r requirements.txt
@@ -22,7 +22,7 @@ Assume that you have font file `SomeFonts.ttf` (or OpenType), then input all the
 python3 ttf2tgs.py SomeFonts.ttf characters.txt
 ```
 
-And you will get Telegram Animated Stickers files under the `tgs` folder.
+And you will get Telegram Animated Sticker files under the `tgs` folder.
 
 ### Options
 
@@ -31,7 +31,7 @@ And you will get Telegram Animated Stickers files under the `tgs` folder.
 options:
   -h, --help       show this help message and exit
   --output OUTPUT  target directory to the output TGS files, default ./tgs
-  --scale SCALE    output image scale factor, less than 1.0
+  --scale SCALE    output image scale factor, between 0 and 1.0
   --svg            save glyph SVG files
 ```
 
