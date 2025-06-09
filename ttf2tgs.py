@@ -31,7 +31,7 @@ def export_glyph(font: TTFont, character: str, index: int) -> bool:
         
         if bpen.bounds is None:
             print(f"Character '{character}' has no outline, skipping.")
-            return
+            return False
             
         # 使用em方格作为SVG大小
         svg_size = units_per_em
@@ -122,7 +122,7 @@ class MyParser(ArgumentParser):
 
 if __name__ == "__main__":
     parser = MyParser(
-        description="Convert a TTF font to a Lottie-compatible JSON file"
+        description="Export glyphs from a font to Telegram animated sticker files"
     )
     parser.add_argument("font", type=str, help="Path to the TTF/OTF font file")
     parser.add_argument(
@@ -141,7 +141,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     output_path = args.output if args.output else output_path
-    scale = args.scale if args.scale < 1 and args.scale > 0 else scale
+    scale = args.scale if 0 < args.scale <= 1.0 else scale
 
     if not os.path.exists(args.font):
         print(f"Font file not found: {args.font}")
