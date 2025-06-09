@@ -6,7 +6,7 @@ Export Font Glyphs to Telegram Animated Sticker Format
 
 - Python 3.x
 
-Install pip denpendcies
+Install pip dependencies
 
 ```sh
 pip install -r requirements.txt
