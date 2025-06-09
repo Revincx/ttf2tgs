@@ -13,7 +13,7 @@ from argparse import ArgumentParser
 output_path = "./tgs"
 scale = 1.0
 
-def export_glyph(font: TTFont, character: str) -> bool:
+def export_glyph(font: TTFont, character: str, index: int) -> bool:
     glyph_set = font.getGlyphSet()
     
     # 获取字体的em方格大小（设计单位）
@@ -59,7 +59,7 @@ def export_glyph(font: TTFont, character: str) -> bool:
                 (svg_size / 2) + scale * center_y
             )
 
-        spen = SVGPathPen(glyph)
+        spen = SVGPathPen(glyph_set)
         tpen = TransformPen(spen, transform)
         glyph.draw(tpen)
 
@@ -73,7 +73,7 @@ def export_glyph(font: TTFont, character: str) -> bool:
             Element("path", d=spen.getCommands(), fill="black", stroke="none")
         )
 
-        with open(f"{output_path}/{gen_char_name(character)}.svg", "wb") as f:
+        with open(f"{output_path}/{index}_{gen_char_name(character)}.svg", "wb") as f:
             f.write(tostring(svg_root))
 
         return True
@@ -143,6 +143,14 @@ if __name__ == "__main__":
     output_path = args.output if args.output else output_path
     scale = args.scale if args.scale < 1 and args.scale > 0 else scale
 
+    if not os.path.exists(args.font):
+        print(f"Font file not found: {args.font}")
+        exit()
+
+    if not os.path.exists(args.chars):
+        print(f"Characters file not found: {args.chars}")
+        exit()
+
     try:
         font = TTFont(args.font)
     except Exception as e:
@@ -155,16 +163,16 @@ if __name__ == "__main__":
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
-    for char in chars:
-        exported = export_glyph(font, char)
+    for idx, char in enumerate(chars, start=1):
+        exported = export_glyph(font, char, idx)
 
         if not exported:
             continue
 
-        svg = import_svg(f"{output_path}/{gen_char_name(char)}.svg")
-        tgs = export_tgs(svg, f"{output_path}/{gen_char_name(char)}.tgs", True, True)
+        svg = import_svg(f"{output_path}/{idx}_{gen_char_name(char)}.svg")
+        tgs = export_tgs(svg, f"{output_path}/{idx}_{gen_char_name(char)}.tgs", True, True)
 
         if args.svg is False:
-            os.remove(f"{output_path}/{gen_char_name(char)}.svg")
+            os.remove(f"{output_path}/{idx}_{gen_char_name(char)}.svg")
 
-        print(f"Exported character '{char}' to {output_path}/{gen_char_name(char)}.tgs")
+        print(f"Exported character '{char}' to {output_path}/{idx}_{gen_char_name(char)}.tgs")
